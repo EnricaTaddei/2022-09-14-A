@@ -6,6 +6,8 @@ package it.polito.tdp.itunes;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.itunes.model.Album;
 import it.polito.tdp.itunes.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -34,7 +36,7 @@ public class FXMLController {
     private Button btnSet; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbA1"
-    private ComboBox<?> cmbA1; // Value injected by FXMLLoader
+    private ComboBox<Album> cmbA1; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtDurata"
     private TextField txtDurata; // Value injected by FXMLLoader
@@ -47,12 +49,26 @@ public class FXMLController {
 
     @FXML
     void doComponente(ActionEvent event) {
-    	
+    	this.txtResult.appendText(model.componentiConnesse(this.cmbA1.getValue()));
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	
+    	if(this.txtDurata.getText()==null ) {
+    		this.txtResult.appendText("Inserire una durata");
+    	}
+    	
+    	double durata = 0;
+    	
+    	try {
+			durata = Double.parseDouble(this.txtDurata.getText());
+		} catch (NumberFormatException e) {
+			//this.txtResult.appendText("Inserire un numero");
+		}
+    	
+    	model.creaGrafo(durata);
+    	this.cmbA1.getItems().addAll(model.restituisciVertici(durata));
     }
 
     @FXML
@@ -74,6 +90,8 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	
     }
 
 }

@@ -17,6 +17,68 @@ import it.polito.tdp.itunes.model.Track;
 
 public class ItunesDAO {
 	
+	
+	
+	public List<Album> getArchi(){
+		final String sql = "SELECT * "
+				+ "FROM track t, playlisttrack p,track t2, playlisttrack p2, album a "
+				+ "WHERE t.TrackId=p.TrackId and t2.TrackId=p2.TrackId "
+				+ "AND t.AlbumId > t2.AlbumId AND t.Name=t2.Name AND p.PlaylistId=p2.PlaylistId AND a.AlbumId=t.AlbumId ";
+		
+		List<Album> result = new LinkedList<>();
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+				result.add(new Album(res.getInt("AlbumId"), res.getString("Title"), 0.0));
+			}
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("SQL Error");
+		}
+		return result;
+	}
+	
+	
+	public List<Album> getVertici(double durata){
+		final String sql = "SELECT *, SUM(t.Milliseconds/60000) AS d "
+				+ "FROM album a, track t "
+				+ "WHERE a.AlbumId=t.AlbumId "
+				+ "GROUP BY t.AlbumId "
+				+ "HAVING SUM(t.Milliseconds/60000)>=?";
+		
+		List<Album> result = new LinkedList<>();
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setDouble(1, durata);
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+				result.add(new Album(res.getInt("AlbumId"), res.getString("Title"), res.getDouble("d") ));
+			}
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("SQL Error");
+		}
+		return result;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public List<Album> getAllAlbums(){
 		final String sql = "SELECT * FROM Album";
 		List<Album> result = new LinkedList<>();
